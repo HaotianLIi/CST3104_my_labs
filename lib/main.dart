@@ -1,40 +1,83 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  String imagePath = 'assets/image/questionMark.png';
-  final passwordController = TextEditingController();
+void main() => runApp(const MyApp());
 
-  runApp(MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(title: Text('Flutter Demo Home Page')),
-      body: StatefulBuilder(
-        builder: (context, setState) {
-          return SingleChildScrollView(
-            child: Column (
-              children: [
-                TextField(decoration: InputDecoration(labelText: 'Login'),),
-                TextField(obscureText:true,
-                          controller: passwordController,
-                          decoration: InputDecoration(labelText: 'Password'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      if(passwordController.text == 'QWERTY123') {
-                        imagePath = 'assets/image/lightBall.png';
-                      } else {
-                        imagePath = 'assets/image/Stop.png';
-                      }
-                    });
-                  },
-                  child: Text('Login'),
-                ),
-                Image.asset(imagePath, width: 300, height: 300,)
-              ]
-            )
-          );
-        }
-      )
-  )));
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: RecipePage(),
+    );
+  }
 }
 
+class RecipePage extends StatelessWidget {
+  const RecipePage({super.key});
+
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("BROWSE CATEGORY"),
+            Text("Not sure about exactly which recipe you're looking for? Do a dive into our most popular categories"),
+            Text("BY MEAT"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                foodImage("assets/image/Lab3/beef.jpg", "beef", Alignment.center),
+                foodImage("assets/image/Lab3/chicken.jpg", "chicken", Alignment.center),
+                foodImage("assets/image/Lab3/pork.jpg", "pork", Alignment.center),
+                foodImage("assets/image/Lab3/seafood.jpg", "seafood", Alignment.center),
+              ],
+            ),
+            Text("BY COURSE"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                foodImage("assets/image/Lab3/maindish.jpg", "Main Dishes", Alignment.bottomCenter),
+                foodImage("assets/image/Lab3/salad.jpg", "Salad Recipes",Alignment.bottomCenter),
+                foodImage("assets/image/Lab3/sidedish.jpg", "Side Dishes",Alignment.bottomCenter),
+                foodImage("assets/image/Lab3/crockpot.jpg", "Crockpot",Alignment.bottomCenter),
+              ],
+            ),
+            Text("BY DESSERT"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                foodImage("assets/image/Lab3/icecream.jpg", "Ice Cream", Alignment.bottomCenter),
+                foodImage("assets/image/Lab3/brownie.jpg", "Brownies",Alignment.bottomCenter),
+                foodImage("assets/image/Lab3/pies.jpg", "Pies",Alignment.bottomCenter),
+                foodImage("assets/image/Lab3/cookies.jpg", "Cookies",Alignment.bottomCenter),
+              ],
+            ),
+          ]
+        ),
+      )
+    );
+  }
+  Widget foodImage(String path, String label, Alignment textPosition) {
+    return Stack(
+      alignment: textPosition,
+      children: [
+        CircleAvatar(
+          backgroundImage: AssetImage(path),
+          radius: 40,
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            backgroundColor: Colors.white
+          )
+        )
+      ],
+    );
+  }
+
+}
