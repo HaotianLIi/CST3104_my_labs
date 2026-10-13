@@ -21,12 +21,29 @@ class _LoginScreenState extends State<LoginScreen> {
   String _imagePath = 'assets/image/questionMark.png';
 
   @override
+  void initState(){
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSavedLogin());
+  }
+  @override
   void dispose() {
     _loginController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  Future<void> _loadSavedLogin() async {
+    final savedLogin = await _prefs.getString(_loginKey);
+    final savedPassword = await _prefs.getString(_passwordKey);
+
+    if (!mounted) return;
+    if (savedLogin.isEmpty || savedPassword.isEmpty) return;
+
+    setState(() {
+      _loginController.text = savedLogin;
+      _passwordController.text = savedPassword;
+    });
+  }
   Future<void> _onLoginPressed() async {
     final bool? save = await showDialog<bool>(
       context: context,
@@ -50,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (save == true) {
       await _prefs.setString(_loginKey, _loginController.text);
-      await _prefs.setString(_loginKey, _passwordController.text);
+      await _prefs.setString(_passwordKey, _passwordController.text);
       print('Saved!');
     } else {
       await _prefs.clear();
