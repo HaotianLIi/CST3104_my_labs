@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -8,8 +10,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  static const String _loginKey = 'login';
+  static const String _passwordKey = 'password';
+
   final _loginController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _prefs = EncryptedSharedPreferences();
+
 
   String _imagePath = 'assets/image/questionMark.png';
 
@@ -41,8 +48,14 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
 
-    // print('User chose: $save');
-
+    if (save == true) {
+      await _prefs.setString(_loginKey, _loginController.text);
+      await _prefs.setString(_loginKey, _passwordController.text);
+      print('Saved!');
+    } else {
+      await _prefs.clear();
+      print('Cleared');
+    }
     if(!mounted) return;
 
     setState(() {
