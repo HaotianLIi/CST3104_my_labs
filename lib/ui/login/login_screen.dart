@@ -20,9 +20,33 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _onLoginPressed() {
+  Future<void> _onLoginPressed() async {
+    final bool? save = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Save login'),
+        content: const Text(
+          'Would you like to save your login name and password for next time?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('No')
+          ),
+          TextButton(
+            onPressed: ()=> Navigator.of(dialogContext).pop(true),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+
+    // print('User chose: $save');
+
+    if(!mounted) return;
+
     setState(() {
-      if (_passwordController.text == 'QWERTY123') {
+      if(_passwordController.text=='QWERTY123'){
         _imagePath = 'assets/image/lightBall.png';
       } else {
         _imagePath = 'assets/image/Stop.png';
