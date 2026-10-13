@@ -43,7 +43,21 @@ class _LoginScreenState extends State<LoginScreen> {
       _loginController.text = savedLogin;
       _passwordController.text = savedPassword;
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: const Text('Previous credential has been loaded'),
+            action: SnackBarAction(
+                label: 'undo',
+                onPressed: (){
+                  setState(() {
+                    _loginController.text = '';
+                    _passwordController.text = '';
+                  });
+                })
+        )
+    );
   }
+
   Future<void> _onLoginPressed() async {
     final bool? save = await showDialog<bool>(
       context: context,
