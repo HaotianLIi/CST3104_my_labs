@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 
+const String loginKey = 'login';
+const String passwordKey = 'password';
+
+const String correctPassword = 'QWERTY123';
+
+const String questionImage = 'assets/image/questionMark.png';
+const String correctImage = 'assets/image/lightBall.png';
+const String wrongImage = 'assets/image/Stop.png';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,90 +18,123 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  static const String _loginKey = 'login';
-  static const String _passwordKey = 'password';
+  // Read and change the text inside the two text fields.
+  final TextEditingController loginController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-  final _loginController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _prefs = EncryptedSharedPreferences();
+  // Help saves data on the phone (encrypted), so it is still there next time.
+  final EncryptedSharedPreferences storage = EncryptedSharedPreferences();
 
+  String currentImage = questionImage;
 
-  String _imagePath = 'assets/image/questionMark.png';
-
+  // initState runs once, when the screen is first created.
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSavedLogin());
+    loadSavedLogin();
   }
+
+  // dispose runs once, when the screen is closed.
   @override
   void dispose() {
-    _loginController.dispose();
-    _passwordController.dispose();
+    loginController.dispose();
+    passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadSavedLogin() async {
-    final savedLogin = await _prefs.getString(_loginKey);
-    final savedPassword = await _prefs.getString(_passwordKey);
+  // Load the login and password saved last time (if there are any).
+  Future<void> loadSavedLogin() async {
+    String savedLogin = await storage.getString(loginKey);
+    String savedPassword = await storage.getString(passwordKey);
 
     if (!mounted) return;
+
     if (savedLogin.isEmpty || savedPassword.isEmpty) return;
 
-    setState(() {
-      _loginController.text = savedLogin;
-      _passwordController.text = savedPassword;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: const Text('Previous credential has been loaded'),
-            action: SnackBarAction(
-                label: 'undo',
-                onPressed: (){
-                  setState(() {
-                    _loginController.text = '';
-                    _passwordController.text = '';
-                  });
-                })
-        )
-    );
+    loginController.text = savedLogin;
+    passwordController.text = savedPassword;
+
+    showLoadedMessage();
   }
 
-  Future<void> _onLoginPressed() async {
-    final bool? save = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Save login'),
-        content: const Text(
-          'Would you like to save your login name and password for next time?'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('No')
-          ),
-          TextButton(
-            onPressed: ()=> Navigator.of(dialogContext).pop(true),
-            child: const Text('Yes'),
-          ),
-        ],
+  // Show a message at the bottom of the screen, with an Undo button.
+  void showLoadedMessage() {
+    SnackBar message = SnackBar(
+      content: const Text('Previous login name and password have been loaded'),
+      action: SnackBarAction(
+        label: 'Undo',
+        onPressed: clearTextFields,
       ),
     );
 
-    if (save == true) {
-      await _prefs.setString(_loginKey, _loginController.text);
-      await _prefs.setString(_passwordKey, _passwordController.text);
-      print('Saved!');
-    } else {
-      await _prefs.clear();
-      print('Cleared');
-    }
-    if(!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(message);
+  }
 
+  void clearTextFields() {
+    loginController.text = '';
+    passwordController.text = '';
+  }
+
+  // When the Login button is pressed
+  Future<void> onLoginPressed() async {
+    bool? userSaidYes = await askToSaveLogin();
+
+    if (userSaidYes == true) {
+      await saveLogin();
+    } else {
+      await deleteSavedLogin();
+    }
+
+    // Stop if the screen was closed while we were waiting.
+    if (!mounted) return;
+
+    checkPassword();
+  }
+
+  Future<bool?> askToSaveLogin() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // tapping outside does not close it
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Save login?'),
+          content: const Text(
+              'Would you like to save your login name and password for next time?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false); // close and answer "No"
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, true); // close and answer "Yes"
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Save what the user typed, so it loads next time.
+  Future<void> saveLogin() async {
+    await storage.setString(loginKey, loginController.text);
+    await storage.setString(passwordKey, passwordController.text);
+  }
+
+  Future<void> deleteSavedLogin() async {
+    await storage.clear();
+  }
+
+  void checkPassword() {
     setState(() {
-      if(_passwordController.text=='QWERTY123'){
-        _imagePath = 'assets/image/lightBall.png';
+      if (passwordController.text == correctPassword) {
+        currentImage = correctImage;
       } else {
-        _imagePath = 'assets/image/Stop.png';
+        currentImage = wrongImage;
       }
     });
   }
@@ -106,19 +147,19 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             TextField(
-              controller: _loginController,
+              controller: loginController,
               decoration: const InputDecoration(labelText: 'Login'),
             ),
             TextField(
-              controller: _passwordController,
-              obscureText: true,
+              controller: passwordController,
+              obscureText: true, // show dots instead of the password
               decoration: const InputDecoration(labelText: 'Password'),
             ),
             ElevatedButton(
-              onPressed: _onLoginPressed,
+              onPressed: onLoginPressed,
               child: const Text('Login'),
             ),
-            Image.asset(_imagePath, width: 300, height: 300),
+            Image.asset(currentImage, width: 300, height: 300),
           ],
         ),
       ),
