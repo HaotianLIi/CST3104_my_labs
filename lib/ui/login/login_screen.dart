@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
+import 'package:my_labs/ui/Profile/profile_page.dart';
 
 const String loginKey = 'login';
 const String passwordKey = 'password';
@@ -130,13 +131,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void checkPassword() {
-    setState(() {
       if (passwordController.text == correctPassword) {
-        currentImage = correctImage;
-      } else {
-        currentImage = wrongImage;
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Welcome Back ${loginController.text}')),
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ProfilePage(loginController.text)),
+        );
       }
-    });
   }
 
   @override
