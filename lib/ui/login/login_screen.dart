@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
+import 'package:my_labs/data_repository.dart';
 import 'package:my_labs/ui/Profile/profile_page.dart';
 
 const String loginKey = 'login';
@@ -33,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     loadSavedLogin();
+    DataRepository.loadData();
   }
 
   // dispose runs once, when the screen is closed.
