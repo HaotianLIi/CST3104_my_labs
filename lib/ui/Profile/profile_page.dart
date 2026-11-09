@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:my_labs/data_repository.dart';
+import 'package:my_labs/ui/list/list_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String loginName;
@@ -43,18 +44,12 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> launchLink(String scheme, String value) async {
     Uri url = Uri(scheme: scheme, path: value);
     bool success = false;
-
     try {
       success = await launchUrl(url);
     } catch (e){
       success = false;
     }
 
-    if(!success){
-      showDialog(context: context, builder: (context) => AlertDialog(
-        content: Text(scheme + ': URLs are not supported')
-      ));
-    }
     await launchUrl(url);
   }
   @override
@@ -100,6 +95,15 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               ElevatedButton(onPressed: () {launchLink('mailto',emailController.text);}, child: Icon(Icons.mail)),
             ],
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ShoppingListPage()),
+              );
+            },
+            child: Text('Shopping List'),
           ),
         ],
       ),
