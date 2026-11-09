@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_labs/ui/list/list_page.dart';
 import 'package:my_labs/ui/login/login_screen.dart';
 
 
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // MaterialApp is needed for the AlertDialog and the SnackBar to work.
     return const MaterialApp(
-      home: LoginScreen(),
+      home: ShoppingListPage(),
     );
   }
 }

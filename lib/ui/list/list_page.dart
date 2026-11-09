@@ -84,7 +84,7 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
             return GestureDetector(
               onLongPress: () => showDeleteDialog(rowNum),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('${rowNum + 1}: ${items[rowNum]}'),
                   Text('quantity: ${quantities[rowNum]}'),
