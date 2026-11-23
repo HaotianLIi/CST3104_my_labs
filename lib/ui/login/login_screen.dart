@@ -20,7 +20,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Read and change the text inside the two text fields.
   final TextEditingController loginController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
