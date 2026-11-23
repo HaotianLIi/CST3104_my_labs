@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:my_labs/database/database.dart';
+import 'package:my_labs/database/shopping_item.dart';
+import 'package:my_labs/database/shopping_item_dao.dart';
 
 class ShoppingListPage extends StatefulWidget {
   const ShoppingListPage({super.key});
@@ -11,8 +14,29 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
   final TextEditingController _itemController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
 
-  List<String> items = [];
-  List<String> quantities = [];
+  // Lab7: the list now holds ShoppingItem objects instead of Strings.
+  List<ShoppingItem> items = [];
+
+  // Lab7: DAO object, set in initState() once the database is open.
+  late ShoppingItemDAO myDAO;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Lab7: open the database and load the items saved last time.
+    $FloorAppDatabase.databaseBuilder('app_database.db').build().then((database) {
+      // get the database DAO object
+      myDAO = database.shoppingItemDao;
+      myDAO.getAllItems().then((listOfItems) {
+        // add the items from the database
+        setState(() {
+          items.clear();
+          items.addAll(listOfItems);
+        });
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -25,8 +49,10 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
     if (_itemController.text.isEmpty || _quantityController.text.isEmpty) return;
 
     setState(() {
-      items.add(_itemController.text);
-      quantities.add(_quantityController.text);
+      // Lab7: create the item with a new id, save it in the database, then show it.
+      var newItem = ShoppingItem(ShoppingItem.ID++, _itemController.text, _quantityController.text);
+      myDAO.insertItem(newItem);
+      items.add(newItem);
     });
 
     _itemController.clear();
@@ -37,7 +63,7 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        content: Text('Do you want to delete ${items[rowNum]}?'),
+        content: Text('Do you want to delete ${items[rowNum].name}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -46,8 +72,9 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
           TextButton(
             onPressed: () {
               setState(() {
+                // Lab7: remove from the database first, then from the list.
+                myDAO.deleteItem(items[rowNum]);
                 items.removeAt(rowNum);
-                quantities.removeAt(rowNum);
               });
               Navigator.pop(context);
             },
@@ -86,8 +113,9 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('${rowNum + 1}: ${items[rowNum]}'),
-                  Text('quantity: ${quantities[rowNum]}'),
+                  // Lab7: the row now reads from the ShoppingItem object.
+                  Text('${rowNum + 1}: ${items[rowNum].name}'),
+                  Text('quantity: ${items[rowNum].quantity}'),
                 ],
               ),
             );
